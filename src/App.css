@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   background: linear-gradient(140deg, #fff9c4 0%, #fce4ec 100%);
-  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-family: "M PLUS Rounded 1c", sans-serif;
 }
 
 /* ---- Header ---- */
@@ -186,7 +186,7 @@
 .digit-btn,
 .delete-btn,
 .submit-btn {
-  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-family: "M PLUS Rounded 1c", sans-serif;
   font-weight: 900;
   border: none;
   border-radius: 18px;

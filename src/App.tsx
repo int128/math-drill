@@ -63,21 +63,21 @@ function App() {
   const handleDigit = useCallback(
     (d: string) => {
       if (phase !== 'question') return
-      setInput(prev => (prev.length >= 3 ? prev : prev + d))
+      setInput((prev) => (prev.length >= 3 ? prev : prev + d))
     },
     [phase],
   )
 
   const handleDelete = useCallback(() => {
     if (phase !== 'question') return
-    setInput(prev => prev.slice(0, -1))
+    setInput((prev) => prev.slice(0, -1))
   }, [phase])
 
   const handleSubmit = useCallback(() => {
     if (phase !== 'question' || input === '') return
     if (parseInt(input, 10) === problem.answer) {
-      setCorrectCount(c => c + 1)
-      setStreak(s => s + 1)
+      setCorrectCount((c) => c + 1)
+      setStreak((s) => s + 1)
       setPhase('correct')
     } else {
       setStreak(0)
@@ -118,9 +118,7 @@ function App() {
 
       <main className="main">
         <div className={cardClass}>
-          <div className={feedbackClass}>
-            {phase === 'correct' ? 'せいかい！🎉' : 'ちがうよ！もういちど 🤔'}
-          </div>
+          <div className={feedbackClass}>{phase === 'correct' ? 'せいかい！🎉' : 'ちがうよ！もういちど 🤔'}</div>
           <div className="problem-display">
             <span className="num">{problem.num1}</span>
             <span className="op">{problem.operator === '+' ? '＋' : '－'}</span>
@@ -131,7 +129,7 @@ function App() {
         </div>
 
         <div className="numpad">
-          {DIGITS.map(d => (
+          {DIGITS.map((d) => (
             <button
               key={d}
               type="button"
@@ -150,12 +148,7 @@ function App() {
           >
             けす
           </button>
-          <button
-            type="button"
-            className="digit-btn"
-            onClick={() => handleDigit('0')}
-            disabled={phase !== 'question'}
-          >
+          <button type="button" className="digit-btn" onClick={() => handleDigit('0')} disabled={phase !== 'question'}>
             0
           </button>
           <button
