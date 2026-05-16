@@ -1,0 +1,70 @@
+name: react
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/react.yaml
+      - src/**
+      - '*.json'
+      - '*.config.*'
+      - pnpm-lock.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/react.yaml
+      - src/**
+      - '*.json'
+      - '*.config.*'
+      - pnpm-lock.yaml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+      - run: npm install -g corepack
+      - run: corepack enable
+      - run: pnpm i
+      - run: pnpm run build
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist
+
+  publish:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+      - run: npm install -g corepack
+      - run: corepack enable
+      - run: pnpm i
+      - run: pnpm run check
+      - uses: int128/update-generated-files-action@37687f06025a7a9460fd579d2c078804cf224012 # v2.95.0
