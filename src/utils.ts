@@ -80,3 +80,81 @@ export function generateKukuPairs(dan: number, mode: KukuMode): KukuPair[] {
   const seq = mode === 'order' ? nums : shuffle(nums)
   return seq.map((n2) => ({ num1: dan, num2: n2 }))
 }
+
+export interface HintLine {
+  label: string
+  detail: string
+}
+
+const POSITION_LABELS = ['いちのくらい', 'じゅうのくらい', 'ひゃくのくらい'] as const
+
+/**
+ * Returns per-column calculation hints for hissan wrong-answer feedback.
+ * Lines are in solving order (ones first, then tens, then hundreds).
+ */
+export function getHintLines(problem: Problem, numDigits: number): HintLine[] {
+  const { num1, num2, operator } = problem
+  const lines: HintLine[] = []
+
+  if (operator === '+') {
+    let carry = 0
+    for (let pos = 0; pos < numDigits; pos++) {
+      const d1 = Math.floor(num1 / 10 ** pos) % 10
+      const d2 = Math.floor(num2 / 10 ** pos) % 10
+      if (d1 === 0 && d2 === 0 && carry === 0) continue
+      const sum = d1 + d2 + carry
+      const newCarry = Math.floor(sum / 10)
+      const digit = sum % 10
+      let detail: string
+      if (d1 === 0 && d2 === 0) {
+        detail = `くりあがりで ${digit}`
+      } else {
+        const base = carry > 0 ? `${d1} ＋ ${d2} ＋ ${carry}（くりあがり）＝ ${sum}` : `${d1} ＋ ${d2} ＝ ${sum}`
+        detail = newCarry > 0 ? `${base}　→　${digit} をかいて、${newCarry} くりあげる` : base
+      }
+      lines.push({ label: POSITION_LABELS[pos], detail })
+      carry = newCarry
+    }
+  } else if (operator === '-') {
+    let borrow = 0
+    for (let pos = 0; pos < numDigits; pos++) {
+      const d1 = Math.floor(num1 / 10 ** pos) % 10
+      const d2 = Math.floor(num2 / 10 ** pos) % 10
+      if (d1 === 0 && d2 === 0 && borrow === 0) continue
+      const effectiveD1 = d1 - borrow
+      const needsBorrow = effectiveD1 < d2
+      let detail: string
+      if (needsBorrow) {
+        detail = `${effectiveD1} ＜ ${d2}　→　じゅうをかりる。${effectiveD1 + 10} − ${d2} ＝ ${effectiveD1 + 10 - d2}`
+      } else if (borrow > 0) {
+        detail = `${d1} − ${borrow}（かした）− ${d2} ＝ ${effectiveD1 - d2}`
+      } else {
+        detail = `${d1} − ${d2} ＝ ${d1 - d2}`
+      }
+      lines.push({ label: POSITION_LABELS[pos], detail })
+      borrow = needsBorrow ? 1 : 0
+    }
+  } else if (operator === '*') {
+    // hard mode: 2-digit × 1-digit
+    let carry = 0
+    for (let pos = 0; pos < numDigits; pos++) {
+      const d1 = Math.floor(num1 / 10 ** pos) % 10
+      if (d1 === 0 && carry === 0) continue
+      const product = d1 * num2 + carry
+      const newCarry = Math.floor(product / 10)
+      const digit = product % 10
+      let detail: string
+      if (d1 === 0) {
+        detail = `くりあがりで ${digit}`
+      } else {
+        const base =
+          carry > 0 ? `${d1} × ${num2} ＋ ${carry}（くりあがり）＝ ${product}` : `${d1} × ${num2} ＝ ${product}`
+        detail = newCarry > 0 ? `${base}　→　${digit} をかいて、${newCarry} くりあげる` : base
+      }
+      lines.push({ label: POSITION_LABELS[pos], detail })
+      carry = newCarry
+    }
+  }
+
+  return lines
+}

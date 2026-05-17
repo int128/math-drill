@@ -93,6 +93,10 @@
     background-color: #ffebee;
     animation: shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97);
   }
+
+  &.hint {
+    background-color: #fff8e1;
+  }
 }
 
 .feedback {
@@ -113,6 +117,10 @@
 
   &.wrong {
     color: #c62828;
+  }
+
+  &.hint {
+    color: #e65100;
   }
 }
 
@@ -337,6 +345,69 @@
     border-color: #c62828;
     border-style: solid;
     color: #c62828;
+  }
+}
+
+/* ---- Hissan container & hint lines ---- */
+.hissan-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.hint-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  background: #fff3e0;
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.hint-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.hint-label {
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  font-weight: 700;
+  color: #e65100;
+  white-space: nowrap;
+}
+
+.hint-detail {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 700;
+  color: #4a148c;
+}
+
+.hint-done-btn {
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-weight: 900;
+  background: linear-gradient(175deg, #ffb74d, #f57c00);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 16px 40px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.22);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+  user-select: none;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
   }
 }
 
