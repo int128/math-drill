@@ -7,13 +7,13 @@ import { SimpleProblem } from './SimpleProblem'
 
 type PlayingScreenProps =
   | { mode: 'hissan'; level: Level; onClear: () => void; onBack: () => void }
-  | { mode: 'kuku'; dan: number | null; pairs: KukuPair[]; onClear: () => void; onBack: () => void }
+  | { mode: 'kuku'; dan: number; pairs: KukuPair[]; onClear: () => void; onBack: () => void }
 
 export function PlayingScreen(props: PlayingScreenProps) {
   const { onClear, onBack } = props
   const isKukuMode = props.mode === 'kuku'
-  const isEasyHissan = props.mode === 'hissan' && props.level.difficulty === 'easy'
-  const isSimpleMode = isKukuMode || isEasyHissan
+  const isSimpleHissan = props.mode === 'hissan' && props.level.difficulty === 'easy'
+  const isSimpleMode = isKukuMode || isSimpleHissan
   const totalQ = props.mode === 'kuku' ? props.pairs.length : TOTAL_QUESTIONS
 
   const [problem, setProblem] = useState<Problem>(() => {
@@ -45,7 +45,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
             setKukuInput('')
           } else {
             setProblem(generateProblem(props.level))
-            if (isEasyHissan) {
+            if (isSimpleHissan) {
               setKukuInput('')
             } else {
               setDigits(Array(getNumBoxes(props.level)).fill(''))
@@ -59,7 +59,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
     }
     if (phase === 'wrong') {
       const t = setTimeout(() => {
-        if (props.mode === 'kuku' || isEasyHissan) {
+        if (props.mode === 'kuku' || isSimpleHissan) {
           setKukuInput('')
         } else {
           setDigits(Array(getNumBoxes(props.level)).fill(''))
@@ -69,7 +69,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
       }, 1500)
       return () => clearTimeout(t)
     }
-  }, [phase, correctCount, totalQ, onClear, props, isEasyHissan])
+  }, [phase, correctCount, totalQ, onClear, props, isSimpleHissan])
 
   const handleDigit = useCallback(
     (d: string) => {
