@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 
-type Operator = '+' | '-'
+type Operator = '+' | '-' | '*'
 type Difficulty = 'easy' | 'hard'
 type AppPhase = 'select' | 'playing' | 'clear'
 type Phase = 'question' | 'correct' | 'wrong'
@@ -22,9 +22,11 @@ interface Problem {
 
 const LEVELS: Level[] = [
   { difficulty: 'easy', operator: '+', label: 'かんたん たしざん', icon: '⭐' },
-  { difficulty: 'easy', operator: '-', label: 'かんたん ひきざん', icon: '⭐' },
   { difficulty: 'hard', operator: '+', label: 'むずかしい たしざん', icon: '🌟' },
+  { difficulty: 'easy', operator: '-', label: 'かんたん ひきざん', icon: '⭐' },
   { difficulty: 'hard', operator: '-', label: 'むずかしい ひきざん', icon: '🌟' },
+  { difficulty: 'easy', operator: '*', label: 'かんたん かけざん', icon: '⭐' },
+  { difficulty: 'hard', operator: '*', label: 'むずかしい かけざん', icon: '🌟' },
 ]
 
 const TOTAL_QUESTIONS = 10
@@ -45,15 +47,26 @@ function generateProblem(level: Level): Problem {
     const num2 = randInt(10, 99)
     return { num1, num2, operator, answer: num1 + num2 }
   }
-  // Subtraction: ensure result >= 1
-  if (difficulty === 'easy') {
-    const num1 = randInt(2, 9)
-    const num2 = randInt(1, num1 - 1)
+  if (operator === '-') {
+    // Subtraction: ensure result >= 1
+    if (difficulty === 'easy') {
+      const num1 = randInt(2, 9)
+      const num2 = randInt(1, num1 - 1)
+      return { num1, num2, operator, answer: num1 - num2 }
+    }
+    const num1 = randInt(20, 99)
+    const num2 = randInt(10, num1 - 1)
     return { num1, num2, operator, answer: num1 - num2 }
   }
-  const num1 = randInt(20, 99)
-  const num2 = randInt(10, num1 - 1)
-  return { num1, num2, operator, answer: num1 - num2 }
+  // Multiplication
+  if (difficulty === 'easy') {
+    const num1 = randInt(1, 9)
+    const num2 = randInt(1, 9)
+    return { num1, num2, operator, answer: num1 * num2 }
+  }
+  const num1 = randInt(2, 9)
+  const num2 = randInt(10, 19)
+  return { num1, num2, operator, answer: num1 * num2 }
 }
 
 const DIGITS = ['7', '8', '9', '4', '5', '6', '1', '2', '3'] as const
@@ -225,7 +238,7 @@ function App() {
               <span className="num">{problem.num1}</span>
             </div>
             <div className="vrow">
-              <span className="op">{problem.operator === '+' ? '＋' : '－'}</span>
+              <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
               <span className="num">{problem.num2}</span>
             </div>
             <div className="vline" />
