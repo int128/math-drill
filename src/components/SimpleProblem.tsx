@@ -1,16 +1,17 @@
 import type { Phase, Problem } from '../types'
 
-interface KukuProblemProps {
+interface SimpleProblemProps {
   problem: Problem
   kukuInput: string
   phase: Phase
 }
 
-export function KukuProblem({ problem, kukuInput, phase }: KukuProblemProps) {
+export function SimpleProblem({ problem, kukuInput, phase }: SimpleProblemProps) {
+  const opSymbol = problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'
   return (
     <div className="kuku-equation">
       <span className="kuku-eq-num">{problem.num1}</span>
-      <span className="kuku-eq-sym">×</span>
+      <span className="kuku-eq-sym">{opSymbol}</span>
       <span className="kuku-eq-num">{problem.num2}</span>
       <span className="kuku-eq-sym">=</span>
       <div
