@@ -3,8 +3,9 @@ import './App.css'
 
 type Operator = '+' | '-' | '*'
 type Difficulty = 'easy' | 'hard'
-type AppPhase = 'select' | 'playing' | 'clear'
+type AppPhase = 'select' | 'kuku-select' | 'playing' | 'clear'
 type Phase = 'question' | 'correct' | 'wrong'
+type KukuMode = 'order' | 'shuffle'
 
 interface Level {
   difficulty: Difficulty
@@ -25,11 +26,10 @@ const LEVELS: Level[] = [
   { difficulty: 'hard', operator: '+', label: 'むずかしい たしざん', icon: '🌟' },
   { difficulty: 'easy', operator: '-', label: 'かんたん ひきざん', icon: '⭐' },
   { difficulty: 'hard', operator: '-', label: 'むずかしい ひきざん', icon: '🌟' },
-  { difficulty: 'easy', operator: '*', label: 'かんたん かけざん', icon: '⭐' },
-  { difficulty: 'hard', operator: '*', label: 'むずかしい かけざん', icon: '🌟' },
 ]
 
 const TOTAL_QUESTIONS = 10
+const KUKU_TOTAL = 9
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -58,15 +58,16 @@ function generateProblem(level: Level): Problem {
     const num2 = randInt(10, num1 - 1)
     return { num1, num2, operator, answer: num1 - num2 }
   }
-  // Multiplication
-  if (difficulty === 'easy') {
-    const num1 = randInt(1, 9)
-    const num2 = randInt(1, 9)
-    return { num1, num2, operator, answer: num1 * num2 }
+  throw new Error(`unsupported operator: ${operator}`)
+}
+
+function shuffle(arr: number[]): number[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
   }
-  const num1 = randInt(2, 9)
-  const num2 = randInt(10, 19)
-  return { num1, num2, operator, answer: num1 * num2 }
+  return a
 }
 
 function getNumBoxes(level: Level): number {
@@ -92,8 +93,13 @@ function App() {
   const [phase, setPhase] = useState<Phase>('question')
   const [correctCount, setCorrectCount] = useState(0)
   const [streak, setStreak] = useState(0)
+  const [isKukuMode, setIsKukuMode] = useState(false)
+  const [kukuDan, setKukuDan] = useState(2)
+  const [kukuMode, setKukuMode] = useState<KukuMode>('order')
+  const [kukuSequence, setKukuSequence] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
   const startLevel = useCallback((l: Level) => {
+    setIsKukuMode(false)
     setLevel(l)
     setProblem(generateProblem(l))
     setDigits(Array(getNumBoxes(l)).fill(''))
@@ -104,20 +110,46 @@ function App() {
     setAppPhase('playing')
   }, [])
 
+  const startKuku = useCallback((dan: number, mode: KukuMode) => {
+    const seq = mode === 'order' ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    setIsKukuMode(true)
+    setKukuDan(dan)
+    setKukuSequence(seq)
+    setProblem({ num1: dan, num2: seq[0], operator: '*', answer: dan * seq[0] })
+    setDigits(['', ''])
+    setFilledCount(0)
+    setPhase('question')
+    setCorrectCount(0)
+    setStreak(0)
+    setAppPhase('playing')
+  }, [])
+
   const backToSelect = useCallback(() => {
+    setIsKukuMode(false)
     setAppPhase('select')
   }, [])
 
   // Auto-transition after feedback
   useEffect(() => {
     if (appPhase !== 'playing') return
+    const totalQ = isKukuMode ? KUKU_TOTAL : TOTAL_QUESTIONS
     if (phase === 'correct') {
       const t = setTimeout(() => {
-        if (correctCount >= TOTAL_QUESTIONS) {
+        if (correctCount >= totalQ) {
           setAppPhase('clear')
         } else {
-          setProblem(generateProblem(level))
-          setDigits(Array(getNumBoxes(level)).fill(''))
+          if (isKukuMode) {
+            setProblem({
+              num1: kukuDan,
+              num2: kukuSequence[correctCount],
+              operator: '*',
+              answer: kukuDan * kukuSequence[correctCount],
+            })
+            setDigits(['', ''])
+          } else {
+            setProblem(generateProblem(level))
+            setDigits(Array(getNumBoxes(level)).fill(''))
+          }
           setFilledCount(0)
           setPhase('question')
         }
@@ -126,13 +158,13 @@ function App() {
     }
     if (phase === 'wrong') {
       const t = setTimeout(() => {
-        setDigits(Array(getNumBoxes(level)).fill(''))
+        setDigits(isKukuMode ? ['', ''] : Array(getNumBoxes(level)).fill(''))
         setFilledCount(0)
         setPhase('question')
       }, 1500)
       return () => clearTimeout(t)
     }
-  }, [phase, appPhase, level, correctCount])
+  }, [phase, appPhase, level, correctCount, isKukuMode, kukuDan, kukuSequence])
 
   const handleDigit = useCallback(
     (d: string) => {
@@ -204,6 +236,51 @@ function App() {
               </button>
             ))}
           </div>
+          <button type="button" className="kuku-btn" onClick={() => setAppPhase('kuku-select')}>
+            <span className="level-icon">✖️</span>
+            <span className="level-label">かけざん 九九</span>
+          </button>
+        </main>
+      </div>
+    )
+  }
+
+  // ---- Kuku select screen ----
+  if (appPhase === 'kuku-select') {
+    return (
+      <div className="app">
+        <header className="header">
+          <h1 className="title">けいさん れんしゅう</h1>
+        </header>
+        <main className="main">
+          <p className="kuku-heading">かけざん 九九</p>
+          <div className="kuku-mode-row">
+            <button
+              type="button"
+              className={`kuku-mode-btn${kukuMode === 'order' ? ' active' : ''}`}
+              onClick={() => setKukuMode('order')}
+            >
+              じゅんばん
+            </button>
+            <button
+              type="button"
+              className={`kuku-mode-btn${kukuMode === 'shuffle' ? ' active' : ''}`}
+              onClick={() => setKukuMode('shuffle')}
+            >
+              シャッフル
+            </button>
+          </div>
+          <p className="kuku-dan-heading">どの だんをえらぼう？</p>
+          <div className="kuku-dan-grid">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((dan) => (
+              <button key={dan} type="button" className="kuku-dan-btn" onClick={() => startKuku(dan, kukuMode)}>
+                {dan}の段
+              </button>
+            ))}
+          </div>
+          <button type="button" className="back-btn" onClick={backToSelect}>
+            ← もどる
+          </button>
         </main>
       </div>
     )
@@ -239,7 +316,7 @@ function App() {
         <h1 className="title">けいさん れんしゅう</h1>
         <div className="score-area">
           <span className="score-badge">
-            🌟 {correctCount} / {TOTAL_QUESTIONS} もん
+            🌟 {correctCount} / {isKukuMode ? KUKU_TOTAL : TOTAL_QUESTIONS} もん
           </span>
           {streak >= 3 && (
             <span className="streak-badge" key={streak}>
