@@ -4,6 +4,11 @@ export type AppPhase = 'select' | 'kuku-select' | 'playing' | 'clear'
 export type Phase = 'question' | 'correct' | 'wrong'
 export type KukuMode = 'order' | 'shuffle'
 
+export interface KukuPair {
+  num1: number
+  num2: number
+}
+
 export interface Level {
   difficulty: Difficulty
   operator: Operator

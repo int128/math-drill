@@ -1,22 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Level, Phase, Problem } from '../types'
-import { generateProblem, getNumBoxes, KUKU_TOTAL, TOTAL_QUESTIONS } from '../utils'
+import type { KukuPair, Level, Phase, Problem } from '../types'
+import { generateProblem, getNumBoxes, TOTAL_QUESTIONS } from '../utils'
 import { HissanProblem } from './HissanProblem'
 import { KukuProblem } from './KukuProblem'
 import { Numpad } from './Numpad'
 
 type PlayingScreenProps =
   | { mode: 'hissan'; level: Level; onClear: () => void; onBack: () => void }
-  | { mode: 'kuku'; dan: number; sequence: number[]; onClear: () => void; onBack: () => void }
+  | { mode: 'kuku'; dan: number | null; pairs: KukuPair[]; onClear: () => void; onBack: () => void }
 
 export function PlayingScreen(props: PlayingScreenProps) {
   const { onClear, onBack } = props
   const isKukuMode = props.mode === 'kuku'
-  const totalQ = isKukuMode ? KUKU_TOTAL : TOTAL_QUESTIONS
+  const totalQ = props.mode === 'kuku' ? props.pairs.length : TOTAL_QUESTIONS
 
   const [problem, setProblem] = useState<Problem>(() => {
     if (props.mode === 'kuku') {
-      return { num1: props.dan, num2: props.sequence[0], operator: '*', answer: props.dan * props.sequence[0] }
+      const { num1, num2 } = props.pairs[0]
+      return { num1, num2, operator: '*', answer: num1 * num2 }
     }
     return generateProblem(props.level)
   })
@@ -37,12 +38,8 @@ export function PlayingScreen(props: PlayingScreenProps) {
           onClear()
         } else {
           if (props.mode === 'kuku') {
-            setProblem({
-              num1: props.dan,
-              num2: props.sequence[correctCount],
-              operator: '*',
-              answer: props.dan * props.sequence[correctCount],
-            })
+            const { num1, num2 } = props.pairs[correctCount]
+            setProblem({ num1, num2, operator: '*', answer: num1 * num2 })
             setKukuInput('')
           } else {
             setProblem(generateProblem(props.level))
@@ -153,23 +150,26 @@ export function PlayingScreen(props: PlayingScreenProps) {
           <span className="score-badge">
             🌟 {correctCount} / {totalQ} もん
           </span>
-          {streak >= 3 && (
+          {streak >= 2 && (
             <span className="streak-badge" key={streak}>
-              🔥 {streak} れんぞく！
+              {streak >= 7 ? '🌟' : streak >= 5 ? '⚡' : '🔥'} {streak} れんぞく！
             </span>
           )}
         </div>
         <div className="progress-area">
-          {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
-            <div key={i} className={`progress-dot${i < correctCount ? ' filled' : ''}`} />
-          ))}
+          {totalQ <= 20 &&
+            Array.from({ length: totalQ }, (_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+              <div key={i} className={`progress-dot${i < correctCount ? ' filled' : ''}`} />
+            ))}
         </div>
       </header>
 
       <main className="main">
         <div className={cardClass}>
-          <div className={feedbackClass}>{phase === 'correct' ? 'せいかい！🎉' : 'ちがうよ！もういちど 🤔'}</div>
+          <div className={feedbackClass}>
+            {phase === 'correct' ? 'せいかい！🎉' : phase === 'wrong' ? `こたえは ${problem.answer}！🤔` : ''}
+          </div>
           {isKukuMode ? (
             <KukuProblem problem={problem} kukuInput={kukuInput} phase={phase} />
           ) : (
