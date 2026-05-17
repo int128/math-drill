@@ -75,44 +75,24 @@
 
 ## 実装
 
-### 技術スタック
+### ディレクトリ構成
 
-| 項目                 | 内容                             |
-| -------------------- | -------------------------------- |
-| フレームワーク       | React 19 + TypeScript            |
-| ビルドツール         | Vite                             |
-| スタイリング         | CSS（ネスト構文）                |
-| フォント             | Google Fonts — M PLUS Rounded 1c |
-| リンター             | Biome                            |
-| パッケージマネージャ | pnpm                             |
+- README.md - 仕様書
+- src/
+  - App.tsx - アプリ本体（ロジック・UI）
+  - App.css - アプリスタイル（ポップデザイン・アニメーション）
+  - index.css - ベーススタイル（リセット・フォント）
+  - main.tsx - エントリポイント
 
-### 主な状態（State）
-
-| 変数           | 型                                   | 説明                                       |
-| -------------- | ------------------------------------ | ------------------------------------------ |
-| `appPhase`     | `'select' \| 'playing' \| 'clear'`   | アプリ全体のフェーズ                       |
-| `level`        | `Level`                              | 選択中のレベル（difficulty, operator）     |
-| `problem`      | `Problem`                            | 現在の問題（num1, num2, operator, answer） |
-| `input`        | `string`                             | ユーザーの入力（最大3文字）                |
-| `phase`        | `'question' \| 'correct' \| 'wrong'` | 問題画面内のフェーズ                       |
-| `correctCount` | `number`                             | 正解した問題数（0〜10）                    |
-| `streak`       | `number`                             | 連続正解数                                 |
-
-### ファイル構成
-
-```
-src/
-  App.tsx      # アプリ本体（ロジック・UI）
-  App.css      # スタイル（ポップデザイン・アニメーション）
-  index.css    # ベースリセット
-  main.tsx     # エントリポイント
-```
-
-## 開発
+### 開発
 
 ```bash
-pnpm dev      # 開発サーバー起動
-pnpm build    # プロダクションビルド
-pnpm preview  # ビルド結果をローカルでプレビュー
-pnpm check    # Biome でリント・フォーマット
+# 開発サーバーで動作確認する
+pnpm dev
+# コードの lint とフォーマットを実行する
+pnpm check
 ```
+
+### デプロイ
+
+GitHub に push すると自動で GitHub Pages にデプロイされます。
