@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import type { KukuPair, Level, Phase, Problem } from '../types'
 import { generateProblem, getNumBoxes, TOTAL_QUESTIONS } from '../utils'
 import { HissanProblem } from './HissanProblem'
-import { KukuProblem } from './KukuProblem'
 import { Numpad } from './Numpad'
+import { SimpleProblem } from './SimpleProblem'
 
 type PlayingScreenProps =
   | { mode: 'hissan'; level: Level; onClear: () => void; onBack: () => void }
@@ -12,6 +12,8 @@ type PlayingScreenProps =
 export function PlayingScreen(props: PlayingScreenProps) {
   const { onClear, onBack } = props
   const isKukuMode = props.mode === 'kuku'
+  const isEasyHissan = props.mode === 'hissan' && props.level.difficulty === 'easy'
+  const isSimpleMode = isKukuMode || isEasyHissan
   const totalQ = props.mode === 'kuku' ? props.pairs.length : TOTAL_QUESTIONS
 
   const [problem, setProblem] = useState<Problem>(() => {
@@ -22,7 +24,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
     return generateProblem(props.level)
   })
   const [digits, setDigits] = useState<string[]>(() =>
-    props.mode === 'hissan' ? Array(getNumBoxes(props.level)).fill('') : [],
+    props.mode === 'hissan' && props.level.difficulty === 'hard' ? Array(getNumBoxes(props.level)).fill('') : [],
   )
   const [filledCount, setFilledCount] = useState(0)
   const [kukuInput, setKukuInput] = useState('')
@@ -43,7 +45,11 @@ export function PlayingScreen(props: PlayingScreenProps) {
             setKukuInput('')
           } else {
             setProblem(generateProblem(props.level))
-            setDigits(Array(getNumBoxes(props.level)).fill(''))
+            if (isEasyHissan) {
+              setKukuInput('')
+            } else {
+              setDigits(Array(getNumBoxes(props.level)).fill(''))
+            }
           }
           setFilledCount(0)
           setPhase('question')
@@ -53,7 +59,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
     }
     if (phase === 'wrong') {
       const t = setTimeout(() => {
-        if (props.mode === 'kuku') {
+        if (props.mode === 'kuku' || isEasyHissan) {
           setKukuInput('')
         } else {
           setDigits(Array(getNumBoxes(props.level)).fill(''))
@@ -63,12 +69,12 @@ export function PlayingScreen(props: PlayingScreenProps) {
       }, 1500)
       return () => clearTimeout(t)
     }
-  }, [phase, correctCount, totalQ, onClear, props])
+  }, [phase, correctCount, totalQ, onClear, props, isEasyHissan])
 
   const handleDigit = useCallback(
     (d: string) => {
       if (phase !== 'question') return
-      if (isKukuMode) {
+      if (isSimpleMode) {
         if (kukuInput.length >= 2) return
         setKukuInput((prev) => prev + d)
         return
@@ -80,12 +86,12 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setDigits(next)
       setFilledCount(filledCount + 1)
     },
-    [phase, isKukuMode, kukuInput, filledCount, digits],
+    [phase, isSimpleMode, kukuInput, filledCount, digits],
   )
 
   const handleDelete = useCallback(() => {
     if (phase !== 'question') return
-    if (isKukuMode) {
+    if (isSimpleMode) {
       setKukuInput((prev) => prev.slice(0, -1))
       return
     }
@@ -95,11 +101,11 @@ export function PlayingScreen(props: PlayingScreenProps) {
     next[idx] = ''
     setDigits(next)
     setFilledCount(filledCount - 1)
-  }, [phase, isKukuMode, filledCount, digits])
+  }, [phase, isSimpleMode, filledCount, digits])
 
   const handleSubmit = useCallback(() => {
     if (phase !== 'question') return
-    if (isKukuMode) {
+    if (isSimpleMode) {
       if (kukuInput.length === 0) return
       const num = parseInt(kukuInput, 10)
       if (num === problem.answer) {
@@ -122,7 +128,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setStreak(0)
       setPhase('wrong')
     }
-  }, [phase, isKukuMode, kukuInput, filledCount, digits, problem.answer])
+  }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer])
 
   // Keyboard support for PC users
   useEffect(() => {
@@ -139,8 +145,8 @@ export function PlayingScreen(props: PlayingScreenProps) {
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
     .filter(Boolean)
     .join(' ')
-  const canDelete = isKukuMode ? kukuInput.length > 0 : filledCount > 0
-  const canSubmit = isKukuMode ? kukuInput.length > 0 : filledCount > 0
+  const canDelete = isSimpleMode ? kukuInput.length > 0 : filledCount > 0
+  const canSubmit = isSimpleMode ? kukuInput.length > 0 : filledCount > 0
 
   return (
     <div className="app">
@@ -170,8 +176,8 @@ export function PlayingScreen(props: PlayingScreenProps) {
           <div className={feedbackClass}>
             {phase === 'correct' ? 'せいかい！🎉' : phase === 'wrong' ? `こたえは ${problem.answer}！🤔` : ''}
           </div>
-          {isKukuMode ? (
-            <KukuProblem problem={problem} kukuInput={kukuInput} phase={phase} />
+          {isSimpleMode ? (
+            <SimpleProblem problem={problem} kukuInput={kukuInput} phase={phase} />
           ) : (
             <HissanProblem problem={problem} digits={digits} filledCount={filledCount} phase={phase} />
           )}
