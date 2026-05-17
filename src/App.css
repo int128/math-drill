@@ -546,6 +546,110 @@
   }
 }
 
+/* ---- Kuku select ---- */
+.kuku-btn {
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 900;
+  border: none;
+  border-radius: 22px;
+  padding: 20px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+  user-select: none;
+  width: min(90vw, 500px);
+  background: linear-gradient(160deg, #f48fb1, #c2185b);
+  color: #fff;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
+.kuku-heading {
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 900;
+  color: #c2185b;
+  margin: 0;
+}
+
+.kuku-mode-row {
+  display: flex;
+  gap: 12px;
+}
+
+.kuku-mode-btn {
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 900;
+  font-size: clamp(1rem, 2.8vw, 1.2rem);
+  border: 3px solid #c2185b;
+  border-radius: 999px;
+  padding: 8px 28px;
+  cursor: pointer;
+  background: #fff;
+  color: #c2185b;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+
+  &.active {
+    background: #c2185b;
+    color: #fff;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.kuku-dan-heading {
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-weight: 900;
+  color: #6a1b9a;
+  margin: 0;
+}
+
+.kuku-dan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: min(90vw, 360px);
+}
+
+.kuku-dan-btn {
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  border: none;
+  border-radius: 18px;
+  padding: 16px 8px;
+  cursor: pointer;
+  background: linear-gradient(160deg, #ce93d8, #8e24aa);
+  color: #fff;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+  user-select: none;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
 /* ---- Back button (during play) ---- */
 .back-btn {
   font-family: "M PLUS Rounded 1c", sans-serif;
