@@ -97,6 +97,7 @@ function App() {
   const [kukuDan, setKukuDan] = useState(2)
   const [kukuMode, setKukuMode] = useState<KukuMode>('order')
   const [kukuSequence, setKukuSequence] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9])
+  const [kukuInput, setKukuInput] = useState('')
 
   const startLevel = useCallback((l: Level) => {
     setIsKukuMode(false)
@@ -116,7 +117,7 @@ function App() {
     setKukuDan(dan)
     setKukuSequence(seq)
     setProblem({ num1: dan, num2: seq[0], operator: '*', answer: dan * seq[0] })
-    setDigits(['', ''])
+    setKukuInput('')
     setFilledCount(0)
     setPhase('question')
     setCorrectCount(0)
@@ -145,7 +146,7 @@ function App() {
               operator: '*',
               answer: kukuDan * kukuSequence[correctCount],
             })
-            setDigits(['', ''])
+            setKukuInput('')
           } else {
             setProblem(generateProblem(level))
             setDigits(Array(getNumBoxes(level)).fill(''))
@@ -158,7 +159,11 @@ function App() {
     }
     if (phase === 'wrong') {
       const t = setTimeout(() => {
-        setDigits(isKukuMode ? ['', ''] : Array(getNumBoxes(level)).fill(''))
+        if (isKukuMode) {
+          setKukuInput('')
+        } else {
+          setDigits(Array(getNumBoxes(level)).fill(''))
+        }
         setFilledCount(0)
         setPhase('question')
       }, 1500)
@@ -169,6 +174,11 @@ function App() {
   const handleDigit = useCallback(
     (d: string) => {
       if (phase !== 'question') return
+      if (isKukuMode) {
+        if (kukuInput.length >= 2) return
+        setKukuInput((prev) => prev + d)
+        return
+      }
       if (filledCount >= digits.length) return
       const idx = digits.length - 1 - filledCount
       const next = [...digits]
@@ -176,21 +186,39 @@ function App() {
       setDigits(next)
       setFilledCount(filledCount + 1)
     },
-    [phase, filledCount, digits],
+    [phase, isKukuMode, kukuInput, filledCount, digits],
   )
 
   const handleDelete = useCallback(() => {
     if (phase !== 'question') return
+    if (isKukuMode) {
+      setKukuInput((prev) => prev.slice(0, -1))
+      return
+    }
     if (filledCount === 0) return
     const idx = digits.length - filledCount
     const next = [...digits]
     next[idx] = ''
     setDigits(next)
     setFilledCount(filledCount - 1)
-  }, [phase, filledCount, digits])
+  }, [phase, isKukuMode, filledCount, digits])
 
   const handleSubmit = useCallback(() => {
-    if (phase !== 'question' || filledCount === 0) return
+    if (phase !== 'question') return
+    if (isKukuMode) {
+      if (kukuInput.length === 0) return
+      const num = parseInt(kukuInput, 10)
+      if (num === problem.answer) {
+        setCorrectCount((c) => c + 1)
+        setStreak((s) => s + 1)
+        setPhase('correct')
+      } else {
+        setStreak(0)
+        setPhase('wrong')
+      }
+      return
+    }
+    if (filledCount === 0) return
     const num = parseInt(digits.filter((d) => d !== '').join(''), 10)
     if (num === problem.answer) {
       setCorrectCount((c) => c + 1)
@@ -200,7 +228,7 @@ function App() {
       setStreak(0)
       setPhase('wrong')
     }
-  }, [phase, filledCount, digits, problem.answer])
+  }, [phase, isKukuMode, kukuInput, filledCount, digits, problem.answer])
 
   // Keyboard support for PC users
   useEffect(() => {
@@ -335,63 +363,83 @@ function App() {
       <main className="main">
         <div className={cardClass}>
           <div className={feedbackClass}>{phase === 'correct' ? 'せいかい！🎉' : 'ちがうよ！もういちど 🤔'}</div>
-          <div className="problem-vertical">
-            <div className="vrow">
-              <span className="op vop-hidden">＋</span>
-              <div className="digit-cells">
-                {splitDigits(problem.num1, digits.length).map((d, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
-                  <div key={i} className="num-cell">
-                    {d}
-                  </div>
-                ))}
+          {isKukuMode ? (
+            <div className="kuku-equation">
+              <span className="kuku-eq-num">{problem.num1}</span>
+              <span className="kuku-eq-sym">×</span>
+              <span className="kuku-eq-num">{problem.num2}</span>
+              <span className="kuku-eq-sym">=</span>
+              <div
+                className={[
+                  'kuku-answer-box',
+                  kukuInput !== '' ? 'filled' : 'active',
+                  phase !== 'question' ? phase : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {kukuInput}
               </div>
             </div>
-            <div className="vrow">
-              <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
-              <div className="digit-cells">
-                {splitDigits(problem.num2, digits.length).map((d, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
-                  <div key={i} className="num-cell">
-                    {d}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="vline" />
-            <div className="vrow">
-              <span className="op vop-hidden">＋</span>
-              <div className="digit-boxes-wrapper">
-                <div className="digit-boxes">
-                  {digits.map((d, i) => {
-                    const isActive = filledCount < digits.length && i === digits.length - 1 - filledCount
-                    const boxClass = [
-                      'digit-box',
-                      d !== '' ? 'filled' : '',
-                      isActive ? 'active' : '',
-                      phase !== 'question' ? phase : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-                    return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
-                      <div key={i} className={boxClass}>
-                        {d}
-                      </div>
-                    )
-                  })}
-                </div>
-                <div className="digit-labels">
-                  {(digits.length === 3 ? ['ひゃく', 'じゅう', 'いち'] : ['じゅう', 'いち']).map((label, i) => (
+          ) : (
+            <div className="problem-vertical">
+              <div className="vrow">
+                <span className="op vop-hidden">＋</span>
+                <div className="digit-cells">
+                  {splitDigits(problem.num1, digits.length).map((d, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
-                    <div key={i} className="digit-label">
-                      {label}
+                    <div key={i} className="num-cell">
+                      {d}
                     </div>
                   ))}
                 </div>
               </div>
+              <div className="vrow">
+                <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
+                <div className="digit-cells">
+                  {splitDigits(problem.num2, digits.length).map((d, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                    <div key={i} className="num-cell">
+                      {d}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="vline" />
+              <div className="vrow">
+                <span className="op vop-hidden">＋</span>
+                <div className="digit-boxes-wrapper">
+                  <div className="digit-boxes">
+                    {digits.map((d, i) => {
+                      const isActive = filledCount < digits.length && i === digits.length - 1 - filledCount
+                      const boxClass = [
+                        'digit-box',
+                        d !== '' ? 'filled' : '',
+                        isActive ? 'active' : '',
+                        phase !== 'question' ? phase : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                      return (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                        <div key={i} className={boxClass}>
+                          {d}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="digit-labels">
+                    {(digits.length === 3 ? ['ひゃく', 'じゅう', 'いち'] : ['じゅう', 'いち']).map((label, i) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                      <div key={i} className="digit-label">
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="numpad">
