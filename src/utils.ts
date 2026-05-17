@@ -5,6 +5,8 @@ export const LEVELS: Level[] = [
   { difficulty: 'hard', operator: '+', label: 'むずかしい たしざん', icon: '🌟' },
   { difficulty: 'easy', operator: '-', label: 'かんたん ひきざん', icon: '⭐' },
   { difficulty: 'hard', operator: '-', label: 'むずかしい ひきざん', icon: '🌟' },
+  { difficulty: 'easy', operator: '*', label: 'かんたん かけざん', icon: '⭐' },
+  { difficulty: 'hard', operator: '*', label: 'むずかしい かけざん', icon: '🌟' },
 ]
 
 export const TOTAL_QUESTIONS = 10
@@ -39,6 +41,16 @@ export function generateProblem(level: Level): Problem {
     const num2 = randInt(10, num1 - 1)
     return { num1, num2, operator, answer: num1 - num2 }
   }
+  if (operator === '*') {
+    if (difficulty === 'easy') {
+      const num1 = randInt(2, 9)
+      const num2 = randInt(2, 9)
+      return { num1, num2, operator, answer: num1 * num2 }
+    }
+    const num1 = randInt(11, 99)
+    const num2 = randInt(2, 9)
+    return { num1, num2, operator, answer: num1 * num2 }
+  }
   throw new Error(`unsupported operator: ${operator}`)
 }
 
@@ -67,14 +79,4 @@ export function generateKukuPairs(dan: number, mode: KukuMode): KukuPair[] {
   const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]
   const seq = mode === 'order' ? nums : shuffle(nums)
   return seq.map((n2) => ({ num1: dan, num2: n2 }))
-}
-
-export function generateAllKukuPairs(): KukuPair[] {
-  const all: KukuPair[] = []
-  for (let n1 = 1; n1 <= 9; n1++) {
-    for (let n2 = 1; n2 <= 9; n2++) {
-      all.push({ num1: n1, num2: n2 })
-    }
-  }
-  return shuffle(all)
 }

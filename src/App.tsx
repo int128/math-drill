@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import './App.css'
 import { PlayingScreen } from './components/PlayingScreen'
 import type { AppPhase, KukuMode, KukuPair, Level } from './types'
-import { generateAllKukuPairs, generateKukuPairs, LEVELS, TOTAL_QUESTIONS } from './utils'
+import { generateKukuPairs, LEVELS, TOTAL_QUESTIONS } from './utils'
 
-type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number | null; pairs: KukuPair[] }
+type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number; pairs: KukuPair[] }
 
 function App() {
   const [appPhase, setAppPhase] = useState<AppPhase>('select')
@@ -20,11 +20,6 @@ function App() {
     setAppPhase('playing')
   }
 
-  const startKukuAll = () => {
-    setPlayingConfig({ mode: 'kuku', dan: null, pairs: generateAllKukuPairs() })
-    setAppPhase('playing')
-  }
-
   const backToSelect = () => setAppPhase('select')
 
   // ---- Level select screen ----
@@ -37,7 +32,7 @@ function App() {
         <main className="main">
           <p className="level-heading">レベルをえらんでね</p>
           <div className="level-grid">
-            {LEVELS.map((l) => (
+            {LEVELS.filter((l) => l.operator !== '*').map((l) => (
               <button
                 key={`${l.difficulty}-${l.operator}`}
                 type="button"
@@ -53,6 +48,19 @@ function App() {
             <span className="level-icon">✖️</span>
             <span className="level-label">かけざん 九九</span>
           </button>
+          <div className="level-grid">
+            {LEVELS.filter((l) => l.operator === '*').map((l) => (
+              <button
+                key={`${l.difficulty}-${l.operator}`}
+                type="button"
+                className={`level-btn ${l.difficulty}`}
+                onClick={() => startLevel(l)}
+              >
+                <span className="level-icon">{l.icon}</span>
+                <span className="level-label">{l.label}</span>
+              </button>
+            ))}
+          </div>
         </main>
       </div>
     )
@@ -83,15 +91,6 @@ function App() {
                 </button>
               </React.Fragment>
             ))}
-            <span className="kuku-dan-label">ぜんぶ</span>
-            <button
-              type="button"
-              className="kuku-shuffle-btn"
-              style={{ gridColumn: '2 / span 2' }}
-              onClick={startKukuAll}
-            >
-              シャッフル
-            </button>
           </div>
           <button type="button" className="back-btn" onClick={backToSelect}>
             ← もどる
