@@ -116,40 +116,56 @@
   }
 }
 
-.problem-display {
+.problem-vertical {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vrow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.vline {
+  border: none;
+  border-top: 5px solid #1a237e;
+  border-radius: 3px;
+  margin: 6px 0;
+}
+
+.vop-hidden {
+  visibility: hidden;
 }
 
 .num,
-.op,
-.eq {
+.op {
   font-size: clamp(2.2rem, 7vw, 4rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .num {
   color: #1a237e;
+  text-align: right;
+  min-width: 2ch;
 }
 
 .op {
   color: #6a1b9a;
-}
-
-.eq {
-  color: #4e342e;
+  text-align: center;
+  width: 1.4em;
+  flex-shrink: 0;
 }
 
 .answer-slot {
   font-size: clamp(2.2rem, 7vw, 4rem);
   font-weight: 900;
   line-height: 1.3;
-  min-width: 3ch;
-  text-align: center;
+  min-width: 2ch;
+  text-align: right;
   color: #1565c0;
   background: #e3f2fd;
   border-radius: 14px;
