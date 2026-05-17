@@ -4,7 +4,6 @@ import { PlayingScreen } from './components/PlayingScreen'
 import type { AppPhase, KukuMode, Level } from './types'
 import { LEVELS, shuffle, TOTAL_QUESTIONS } from './utils'
 
-
 type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number; sequence: number[] }
 
 function App() {
