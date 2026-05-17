@@ -69,13 +69,26 @@ function generateProblem(level: Level): Problem {
   return { num1, num2, operator, answer: num1 * num2 }
 }
 
+function getNumBoxes(level: Level): number {
+  return level.difficulty === 'hard' ? 3 : 2
+}
+
+function splitDigits(num: number, N: number): string[] {
+  const s = String(num)
+  return Array.from({ length: N }, (_, i) => {
+    const pos = s.length - (N - i)
+    return pos >= 0 ? s[pos] : ''
+  })
+}
+
 const DIGITS = ['7', '8', '9', '4', '5', '6', '1', '2', '3'] as const
 
 function App() {
   const [appPhase, setAppPhase] = useState<AppPhase>('select')
   const [level, setLevel] = useState<Level>(LEVELS[0])
   const [problem, setProblem] = useState<Problem>(() => generateProblem(LEVELS[0]))
-  const [input, setInput] = useState('')
+  const [digits, setDigits] = useState<string[]>(() => Array(getNumBoxes(LEVELS[0])).fill(''))
+  const [filledCount, setFilledCount] = useState(0)
   const [phase, setPhase] = useState<Phase>('question')
   const [correctCount, setCorrectCount] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -83,7 +96,8 @@ function App() {
   const startLevel = useCallback((l: Level) => {
     setLevel(l)
     setProblem(generateProblem(l))
-    setInput('')
+    setDigits(Array(getNumBoxes(l)).fill(''))
+    setFilledCount(0)
     setPhase('question')
     setCorrectCount(0)
     setStreak(0)
@@ -103,7 +117,8 @@ function App() {
           setAppPhase('clear')
         } else {
           setProblem(generateProblem(level))
-          setInput('')
+          setDigits(Array(getNumBoxes(level)).fill(''))
+          setFilledCount(0)
           setPhase('question')
         }
       }, 1500)
@@ -111,7 +126,8 @@ function App() {
     }
     if (phase === 'wrong') {
       const t = setTimeout(() => {
-        setInput('')
+        setDigits(Array(getNumBoxes(level)).fill(''))
+        setFilledCount(0)
         setPhase('question')
       }, 1500)
       return () => clearTimeout(t)
@@ -121,19 +137,30 @@ function App() {
   const handleDigit = useCallback(
     (d: string) => {
       if (phase !== 'question') return
-      setInput((prev) => (prev.length >= 3 ? prev : prev + d))
+      if (filledCount >= digits.length) return
+      const idx = digits.length - 1 - filledCount
+      const next = [...digits]
+      next[idx] = d
+      setDigits(next)
+      setFilledCount(filledCount + 1)
     },
-    [phase],
+    [phase, filledCount, digits],
   )
 
   const handleDelete = useCallback(() => {
     if (phase !== 'question') return
-    setInput((prev) => prev.slice(0, -1))
-  }, [phase])
+    if (filledCount === 0) return
+    const idx = digits.length - filledCount
+    const next = [...digits]
+    next[idx] = ''
+    setDigits(next)
+    setFilledCount(filledCount - 1)
+  }, [phase, filledCount, digits])
 
   const handleSubmit = useCallback(() => {
-    if (phase !== 'question' || input === '') return
-    if (parseInt(input, 10) === problem.answer) {
+    if (phase !== 'question' || filledCount === 0) return
+    const num = parseInt(digits.filter((d) => d !== '').join(''), 10)
+    if (num === problem.answer) {
       setCorrectCount((c) => c + 1)
       setStreak((s) => s + 1)
       setPhase('correct')
@@ -141,7 +168,7 @@ function App() {
       setStreak(0)
       setPhase('wrong')
     }
-  }, [phase, input, problem.answer])
+  }, [phase, filledCount, digits, problem.answer])
 
   // Keyboard support for PC users
   useEffect(() => {
@@ -205,7 +232,6 @@ function App() {
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
     .filter(Boolean)
     .join(' ')
-  const slotClass = ['answer-slot', phase !== 'question' ? phase : ''].filter(Boolean).join(' ')
 
   return (
     <div className="app">
@@ -223,7 +249,7 @@ function App() {
         </div>
         <div className="progress-area">
           {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => (
-            // biome-ignore lint: fixed-length static list, index as key is safe
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
             <div key={i} className={`progress-dot${i < correctCount ? ' filled' : ''}`} />
           ))}
         </div>
@@ -235,16 +261,58 @@ function App() {
           <div className="problem-vertical">
             <div className="vrow">
               <span className="op vop-hidden">＋</span>
-              <span className="num">{problem.num1}</span>
+              <div className="digit-cells">
+                {splitDigits(problem.num1, digits.length).map((d, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">
+                    {d}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="vrow">
               <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
-              <span className="num">{problem.num2}</span>
+              <div className="digit-cells">
+                {splitDigits(problem.num2, digits.length).map((d, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">
+                    {d}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="vline" />
             <div className="vrow">
               <span className="op vop-hidden">＋</span>
-              <span className={slotClass}>{input === '' ? '□' : input}</span>
+              <div className="digit-boxes-wrapper">
+                <div className="digit-boxes">
+                  {digits.map((d, i) => {
+                    const isActive = filledCount < digits.length && i === digits.length - 1 - filledCount
+                    const boxClass = [
+                      'digit-box',
+                      d !== '' ? 'filled' : '',
+                      isActive ? 'active' : '',
+                      phase !== 'question' ? phase : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
+                    return (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                      <div key={i} className={boxClass}>
+                        {d}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="digit-labels">
+                  {(digits.length === 3 ? ['ひゃく', 'じゅう', 'いち'] : ['じゅう', 'いち']).map((label, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                    <div key={i} className="digit-label">
+                      {label}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -265,7 +333,7 @@ function App() {
             type="button"
             className="delete-btn"
             onClick={handleDelete}
-            disabled={phase !== 'question' || input === ''}
+            disabled={phase !== 'question' || filledCount === 0}
           >
             けす
           </button>
@@ -276,7 +344,7 @@ function App() {
             type="button"
             className="submit-btn"
             onClick={handleSubmit}
-            disabled={phase !== 'question' || input === ''}
+            disabled={phase !== 'question' || filledCount === 0}
           >
             こたえる
           </button>
