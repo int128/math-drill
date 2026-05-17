@@ -125,9 +125,9 @@ export function getHintLines(problem: Problem, numDigits: number): HintLine[] {
       const needsBorrow = effectiveD1 < d2
       let detail: string
       if (needsBorrow) {
-        detail = `${effectiveD1} ＜ ${d2}　→　じゅうをかりる。${effectiveD1 + 10} − ${d2} ＝ ？`
+        detail = `${effectiveD1} は ${d2} より少ないので、くりさがり。 ${effectiveD1 + 10} − ${d2} ＝ ？`
       } else if (borrow > 0) {
-        detail = `${d1} − ${borrow}（かした）− ${d2} ＝ ？`
+        detail = `${d1} − 1（くりさがり）− ${d2} ＝ ？`
       } else {
         detail = `${d1} − ${d2} ＝ ？`
       }
