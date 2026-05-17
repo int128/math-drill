@@ -97,12 +97,15 @@ export function HissanProblem({ problem, digits, filledCount, phase }: HissanPro
           <div className="digit-boxes-wrapper">
             <div className="digit-boxes">
               {digits.map((d, i) => {
-                const isActive = phase === 'question' && filledCount < numDigits && i === numDigits - 1 - filledCount
+                const isActive =
+                  (phase === 'question' || phase === 'hint') &&
+                  filledCount < numDigits &&
+                  i === numDigits - 1 - filledCount
                 const boxClass = [
                   'digit-box',
                   d !== '' ? 'filled' : '',
                   isActive ? 'active' : '',
-                  isHint ? 'wrong' : phase !== 'question' ? phase : '',
+                  phase === 'correct' || phase === 'wrong' ? phase : '',
                 ]
                   .filter(Boolean)
                   .join(' ')

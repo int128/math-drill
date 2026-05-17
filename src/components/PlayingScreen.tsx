@@ -70,7 +70,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
 
   const handleDigit = useCallback(
     (d: string) => {
-      if (phase !== 'question') return
+      if (phase !== 'question' && phase !== 'hint') return
       if (isSimpleMode) {
         if (kukuInput.length >= 2) return
         setKukuInput((prev) => prev + d)
@@ -87,7 +87,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
   )
 
   const handleDelete = useCallback(() => {
-    if (phase !== 'question') return
+    if (phase !== 'question' && phase !== 'hint') return
     if (isSimpleMode) {
       setKukuInput((prev) => prev.slice(0, -1))
       return
@@ -101,7 +101,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
   }, [phase, isSimpleMode, filledCount, digits])
 
   const handleSubmit = useCallback(() => {
-    if (phase !== 'question') return
+    if (phase !== 'question' && phase !== 'hint') return
     if (isSimpleMode) {
       if (kukuInput.length === 0) return
       const num = parseInt(kukuInput, 10)
@@ -123,31 +123,22 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setPhase('correct')
     } else {
       setStreak(0)
+      setDigits(Array(digits.length).fill(''))
+      setFilledCount(0)
       setPhase('hint')
     }
   }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer])
-
-  const handleHintDone = useCallback(() => {
-    if (props.mode === 'hissan') {
-      setDigits(Array(getNumBoxes(props.level)).fill(''))
-    }
-    setFilledCount(0)
-    setPhase('question')
-  }, [props])
 
   // Keyboard support for PC users
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key >= '0' && e.key <= '9') handleDigit(e.key)
       else if (e.key === 'Backspace') handleDelete()
-      else if (e.key === 'Enter') {
-        if (phase === 'hint') handleHintDone()
-        else handleSubmit()
-      }
+      else if (e.key === 'Enter') handleSubmit()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [handleDigit, handleDelete, handleSubmit, phase, handleHintDone])
+  }, [handleDigit, handleDelete, handleSubmit])
 
   const cardClass = ['problem-card', phase !== 'question' ? phase : ''].filter(Boolean).join(' ')
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
@@ -197,19 +188,31 @@ export function PlayingScreen(props: PlayingScreenProps) {
           )}
         </div>
 
-        {phase === 'hint' ? (
-          <button type="button" className="hint-done-btn" onClick={handleHintDone}>
-            わかった！　もう一度やってみる →
+        <Numpad
+          phase={phase}
+          canDelete={canDelete}
+          canSubmit={canSubmit}
+          onDigit={handleDigit}
+          onDelete={handleDelete}
+          onSubmit={handleSubmit}
+        />
+
+        {!isSimpleMode && (
+          <button
+            type="button"
+            className="hint-btn"
+            onClick={() => {
+              if (phase === 'hint') {
+                setPhase('question')
+              } else if (phase === 'question') {
+                setDigits(Array(digits.length).fill(''))
+                setFilledCount(0)
+                setPhase('hint')
+              }
+            }}
+          >
+            {phase === 'hint' ? '✕ ヒントをとじる' : '🔍 ヒントをみる'}
           </button>
-        ) : (
-          <Numpad
-            phase={phase}
-            canDelete={canDelete}
-            canSubmit={canSubmit}
-            onDigit={handleDigit}
-            onDelete={handleDelete}
-            onSubmit={handleSubmit}
-          />
         )}
 
         <button type="button" className="back-btn" onClick={onBack}>
