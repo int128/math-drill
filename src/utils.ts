@@ -84,6 +84,7 @@ export function generateKukuPairs(dan: number, mode: KukuMode): KukuPair[] {
 export interface HintLine {
   label: string
   detail: string
+  pos: number
 }
 
 const POSITION_LABELS = ['いちのくらい', 'じゅうのくらい', 'ひゃくのくらい'] as const
@@ -104,15 +105,14 @@ export function getHintLines(problem: Problem, numDigits: number): HintLine[] {
       if (d1 === 0 && d2 === 0 && carry === 0) continue
       const sum = d1 + d2 + carry
       const newCarry = Math.floor(sum / 10)
-      const digit = sum % 10
       let detail: string
       if (d1 === 0 && d2 === 0) {
-        detail = `くりあがりで ${digit}`
+        detail = `くりあがりは いくつ？`
       } else {
-        const base = carry > 0 ? `${d1} ＋ ${d2} ＋ ${carry}（くりあがり）＝ ${sum}` : `${d1} ＋ ${d2} ＝ ${sum}`
-        detail = newCarry > 0 ? `${base}　→　${digit} をかいて、${newCarry} くりあげる` : base
+        const base = carry > 0 ? `${d1} ＋ ${d2} ＋ ${carry}（くりあがり）＝ ？` : `${d1} ＋ ${d2} ＝ ？`
+        detail = newCarry > 0 ? `${base}（くりあがりあり）` : base
       }
-      lines.push({ label: POSITION_LABELS[pos], detail })
+      lines.push({ label: POSITION_LABELS[pos], detail, pos })
       carry = newCarry
     }
   } else if (operator === '-') {
@@ -125,13 +125,13 @@ export function getHintLines(problem: Problem, numDigits: number): HintLine[] {
       const needsBorrow = effectiveD1 < d2
       let detail: string
       if (needsBorrow) {
-        detail = `${effectiveD1} ＜ ${d2}　→　じゅうをかりる。${effectiveD1 + 10} − ${d2} ＝ ${effectiveD1 + 10 - d2}`
+        detail = `${effectiveD1} ＜ ${d2}　→　じゅうをかりる。${effectiveD1 + 10} − ${d2} ＝ ？`
       } else if (borrow > 0) {
-        detail = `${d1} − ${borrow}（かした）− ${d2} ＝ ${effectiveD1 - d2}`
+        detail = `${d1} − ${borrow}（かした）− ${d2} ＝ ？`
       } else {
-        detail = `${d1} − ${d2} ＝ ${d1 - d2}`
+        detail = `${d1} − ${d2} ＝ ？`
       }
-      lines.push({ label: POSITION_LABELS[pos], detail })
+      lines.push({ label: POSITION_LABELS[pos], detail, pos })
       borrow = needsBorrow ? 1 : 0
     }
   } else if (operator === '*') {
@@ -142,16 +142,14 @@ export function getHintLines(problem: Problem, numDigits: number): HintLine[] {
       if (d1 === 0 && carry === 0) continue
       const product = d1 * num2 + carry
       const newCarry = Math.floor(product / 10)
-      const digit = product % 10
       let detail: string
       if (d1 === 0) {
-        detail = `くりあがりで ${digit}`
+        detail = `くりあがりは いくつ？`
       } else {
-        const base =
-          carry > 0 ? `${d1} × ${num2} ＋ ${carry}（くりあがり）＝ ${product}` : `${d1} × ${num2} ＝ ${product}`
-        detail = newCarry > 0 ? `${base}　→　${digit} をかいて、${newCarry} くりあげる` : base
+        const base = carry > 0 ? `${d1} × ${num2} ＋ ${carry}（くりあがり）＝ ？` : `${d1} × ${num2} ＝ ？`
+        detail = newCarry > 0 ? `${base}（くりあがりあり）` : base
       }
-      lines.push({ label: POSITION_LABELS[pos], detail })
+      lines.push({ label: POSITION_LABELS[pos], detail, pos })
       carry = newCarry
     }
   }
