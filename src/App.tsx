@@ -73,6 +73,14 @@ function getNumBoxes(level: Level): number {
   return level.difficulty === 'hard' ? 3 : 2
 }
 
+function splitDigits(num: number, N: number): string[] {
+  const s = String(num)
+  return Array.from({ length: N }, (_, i) => {
+    const pos = s.length - (N - i)
+    return pos >= 0 ? s[pos] : ''
+  })
+}
+
 const DIGITS = ['7', '8', '9', '4', '5', '6', '1', '2', '3'] as const
 
 function App() {
@@ -253,11 +261,21 @@ function App() {
           <div className="problem-vertical">
             <div className="vrow">
               <span className="op vop-hidden">＋</span>
-              <span className="num">{problem.num1}</span>
+              <div className="digit-cells">
+                {splitDigits(problem.num1, digits.length).map((d, i) => (
+                  // biome-ignore lint: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">{d}</div>
+                ))}
+              </div>
             </div>
             <div className="vrow">
               <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
-              <span className="num">{problem.num2}</span>
+              <div className="digit-cells">
+                {splitDigits(problem.num2, digits.length).map((d, i) => (
+                  // biome-ignore lint: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">{d}</div>
+                ))}
+              </div>
             </div>
             <div className="vline" />
             <div className="vrow">
