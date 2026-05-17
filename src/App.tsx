@@ -219,12 +219,20 @@ function App() {
       <main className="main">
         <div className={cardClass}>
           <div className={feedbackClass}>{phase === 'correct' ? 'せいかい！🎉' : 'ちがうよ！もういちど 🤔'}</div>
-          <div className="problem-display">
-            <span className="num">{problem.num1}</span>
-            <span className="op">{problem.operator === '+' ? '＋' : '－'}</span>
-            <span className="num">{problem.num2}</span>
-            <span className="eq">＝</span>
-            <span className={slotClass}>{input === '' ? '□' : input}</span>
+          <div className="problem-vertical">
+            <div className="vrow">
+              <span className="op vop-hidden">＋</span>
+              <span className="num">{problem.num1}</span>
+            </div>
+            <div className="vrow">
+              <span className="op">{problem.operator === '+' ? '＋' : '－'}</span>
+              <span className="num">{problem.num2}</span>
+            </div>
+            <div className="vline" />
+            <div className="vrow">
+              <span className="op vop-hidden">＋</span>
+              <span className={slotClass}>{input === '' ? '□' : input}</span>
+            </div>
           </div>
         </div>
 
