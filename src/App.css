@@ -139,10 +139,6 @@
   line-height: 1.1;
 }
 
-.kuku-equation .digit-boxes {
-  gap: 10px;
-}
-
 .kuku-answer-box {
   font-size: clamp(2.6rem, 8vw, 4.5rem);
   font-weight: 900;
@@ -293,6 +289,10 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.kuku-equation .digit-boxes {
+  gap: 10px;
 }
 
 .digit-box {
