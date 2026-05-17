@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import './App.css'
 import { PlayingScreen } from './components/PlayingScreen'
 import type { AppPhase, KukuMode, Level } from './types'
 import { LEVELS, shuffle, TOTAL_QUESTIONS } from './utils'
 
+
 type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number; sequence: number[] }
 
 function App() {
   const [appPhase, setAppPhase] = useState<AppPhase>('select')
-  const [kukuMode, setKukuMode] = useState<KukuMode>('order')
   const [playingConfig, setPlayingConfig] = useState<PlayingConfig>({ mode: 'hissan', level: LEVELS[0] })
 
   const startLevel = (l: Level) => {
@@ -64,28 +64,21 @@ function App() {
         </header>
         <main className="main">
           <p className="kuku-heading">かけざん 九九</p>
-          <div className="kuku-mode-row">
-            <button
-              type="button"
-              className={`kuku-mode-btn${kukuMode === 'order' ? ' active' : ''}`}
-              onClick={() => setKukuMode('order')}
-            >
-              じゅんばん
-            </button>
-            <button
-              type="button"
-              className={`kuku-mode-btn${kukuMode === 'shuffle' ? ' active' : ''}`}
-              onClick={() => setKukuMode('shuffle')}
-            >
-              シャッフル
-            </button>
-          </div>
           <p className="kuku-dan-heading">どの だんをえらぼう？</p>
-          <div className="kuku-dan-grid">
+          <div className="kuku-dan-list">
+            <div className="kuku-dan-list-header" />
+            <span className="kuku-dan-list-col-label">じゅんばん</span>
+            <span className="kuku-dan-list-col-label">シャッフル</span>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((dan) => (
-              <button key={dan} type="button" className="kuku-dan-btn" onClick={() => startKuku(dan, kukuMode)}>
-                {dan}の段
-              </button>
+              <React.Fragment key={dan}>
+                <span className="kuku-dan-label">{dan}の段</span>
+                <button type="button" className="kuku-order-btn" onClick={() => startKuku(dan, 'order')}>
+                  じゅんばん
+                </button>
+                <button type="button" className="kuku-shuffle-btn" onClick={() => startKuku(dan, 'shuffle')}>
+                  シャッフル
+                </button>
+              </React.Fragment>
             ))}
           </div>
           <button type="button" className="back-btn" onClick={backToSelect}>
