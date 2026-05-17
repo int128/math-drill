@@ -27,7 +27,7 @@ function App() {
     return (
       <div className="app">
         <header className="header">
-          <h1 className="title">けいさん れんしゅう</h1>
+          <h1 className="title">けいさんドリル</h1>
         </header>
         <main className="main">
           <p className="level-heading">レベルをえらんでね</p>
@@ -71,7 +71,7 @@ function App() {
     return (
       <div className="app">
         <header className="header">
-          <h1 className="title">けいさん れんしゅう</h1>
+          <h1 className="title">けいさんドリル</h1>
         </header>
         <main className="main">
           <p className="kuku-heading">かけざん 九九</p>
