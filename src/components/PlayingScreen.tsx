@@ -58,12 +58,9 @@ export function PlayingScreen(props: PlayingScreenProps) {
       return () => clearTimeout(t)
     }
     if (phase === 'wrong') {
+      // Only simple mode reaches 'wrong'; hissan mode goes directly to 'hint'
       const t = setTimeout(() => {
-        if (props.mode === 'kuku' || isSimpleHissan) {
-          setKukuInput('')
-        } else {
-          setDigits(Array(getNumBoxes(props.level)).fill(''))
-        }
+        setKukuInput('')
         setFilledCount(0)
         setPhase('question')
       }, 1500)
@@ -126,20 +123,31 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setPhase('correct')
     } else {
       setStreak(0)
-      setPhase('wrong')
+      setPhase('hint')
     }
   }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer])
+
+  const handleHintDone = useCallback(() => {
+    if (props.mode === 'hissan') {
+      setDigits(Array(getNumBoxes(props.level)).fill(''))
+    }
+    setFilledCount(0)
+    setPhase('question')
+  }, [props])
 
   // Keyboard support for PC users
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key >= '0' && e.key <= '9') handleDigit(e.key)
       else if (e.key === 'Backspace') handleDelete()
-      else if (e.key === 'Enter') handleSubmit()
+      else if (e.key === 'Enter') {
+        if (phase === 'hint') handleHintDone()
+        else handleSubmit()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [handleDigit, handleDelete, handleSubmit])
+  }, [handleDigit, handleDelete, handleSubmit, phase, handleHintDone])
 
   const cardClass = ['problem-card', phase !== 'question' ? phase : ''].filter(Boolean).join(' ')
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
@@ -174,7 +182,13 @@ export function PlayingScreen(props: PlayingScreenProps) {
       <main className="main">
         <div className={cardClass}>
           <div className={feedbackClass}>
-            {phase === 'correct' ? 'せいかい！🎉' : phase === 'wrong' ? `こたえは ${problem.answer}！🤔` : ''}
+            {phase === 'correct'
+              ? 'せいかい！🎉'
+              : phase === 'wrong'
+                ? `こたえは ${problem.answer}！🤔`
+                : phase === 'hint'
+                  ? 'こうやって といてみよう！🔍'
+                  : ''}
           </div>
           {isSimpleMode ? (
             <SimpleProblem problem={problem} kukuInput={kukuInput} phase={phase} />
@@ -183,14 +197,20 @@ export function PlayingScreen(props: PlayingScreenProps) {
           )}
         </div>
 
-        <Numpad
-          phase={phase}
-          canDelete={canDelete}
-          canSubmit={canSubmit}
-          onDigit={handleDigit}
-          onDelete={handleDelete}
-          onSubmit={handleSubmit}
-        />
+        {phase === 'hint' ? (
+          <button type="button" className="hint-done-btn" onClick={handleHintDone}>
+            わかった！　もう一度やってみる →
+          </button>
+        ) : (
+          <Numpad
+            phase={phase}
+            canDelete={canDelete}
+            canSubmit={canSubmit}
+            onDigit={handleDigit}
+            onDelete={handleDelete}
+            onSubmit={handleSubmit}
+          />
+        )}
 
         <button type="button" className="back-btn" onClick={onBack}>
           ← もどる

@@ -1,7 +1,7 @@
 export type Operator = '+' | '-' | '*'
 export type Difficulty = 'easy' | 'hard'
 export type AppPhase = 'select' | 'kuku-select' | 'playing' | 'clear'
-export type Phase = 'question' | 'correct' | 'wrong'
+export type Phase = 'question' | 'correct' | 'wrong' | 'hint'
 export type KukuMode = 'order' | 'shuffle'
 
 export interface KukuPair {
