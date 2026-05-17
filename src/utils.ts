@@ -1,4 +1,4 @@
-import type { Level, Problem } from './types'
+import type { KukuMode, KukuPair, Level, Problem } from './types'
 
 export const LEVELS: Level[] = [
   { difficulty: 'easy', operator: '+', label: 'かんたん たしざん', icon: '⭐' },
@@ -42,7 +42,7 @@ export function generateProblem(level: Level): Problem {
   throw new Error(`unsupported operator: ${operator}`)
 }
 
-export function shuffle(arr: number[]): number[] {
+export function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -61,4 +61,20 @@ export function splitDigits(num: number, N: number): string[] {
     const pos = s.length - (N - i)
     return pos >= 0 ? s[pos] : ''
   })
+}
+
+export function generateKukuPairs(dan: number, mode: KukuMode): KukuPair[] {
+  const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  const seq = mode === 'order' ? nums : shuffle(nums)
+  return seq.map((n2) => ({ num1: dan, num2: n2 }))
+}
+
+export function generateAllKukuPairs(): KukuPair[] {
+  const all: KukuPair[] = []
+  for (let n1 = 1; n1 <= 9; n1++) {
+    for (let n2 = 1; n2 <= 9; n2++) {
+      all.push({ num1: n1, num2: n2 })
+    }
+  }
+  return shuffle(all)
 }

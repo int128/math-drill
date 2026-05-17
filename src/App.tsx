@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import './App.css'
 import { PlayingScreen } from './components/PlayingScreen'
-import type { AppPhase, KukuMode, Level } from './types'
-import { LEVELS, shuffle, TOTAL_QUESTIONS } from './utils'
+import type { AppPhase, KukuMode, KukuPair, Level } from './types'
+import { generateAllKukuPairs, generateKukuPairs, LEVELS, TOTAL_QUESTIONS } from './utils'
 
-type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number; sequence: number[] }
+type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number | null; pairs: KukuPair[] }
 
 function App() {
   const [appPhase, setAppPhase] = useState<AppPhase>('select')
@@ -16,8 +16,12 @@ function App() {
   }
 
   const startKuku = (dan: number, mode: KukuMode) => {
-    const seq = mode === 'order' ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    setPlayingConfig({ mode: 'kuku', dan, sequence: seq })
+    setPlayingConfig({ mode: 'kuku', dan, pairs: generateKukuPairs(dan, mode) })
+    setAppPhase('playing')
+  }
+
+  const startKukuAll = () => {
+    setPlayingConfig({ mode: 'kuku', dan: null, pairs: generateAllKukuPairs() })
     setAppPhase('playing')
   }
 
@@ -79,6 +83,15 @@ function App() {
                 </button>
               </React.Fragment>
             ))}
+            <span className="kuku-dan-label">ぜんぶ</span>
+            <button
+              type="button"
+              className="kuku-shuffle-btn"
+              style={{ gridColumn: '2 / span 2' }}
+              onClick={startKukuAll}
+            >
+              シャッフル
+            </button>
           </div>
           <button type="button" className="back-btn" onClick={backToSelect}>
             ← もどる
@@ -112,7 +125,7 @@ function App() {
       <PlayingScreen
         mode="kuku"
         dan={playingConfig.dan}
-        sequence={playingConfig.sequence}
+        pairs={playingConfig.pairs}
         onClear={() => setAppPhase('clear')}
         onBack={backToSelect}
       />
