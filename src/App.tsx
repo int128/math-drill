@@ -249,7 +249,7 @@ function App() {
         </div>
         <div className="progress-area">
           {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => (
-            // biome-ignore lint: fixed-length static list, index as key is safe
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
             <div key={i} className={`progress-dot${i < correctCount ? ' filled' : ''}`} />
           ))}
         </div>
@@ -263,8 +263,10 @@ function App() {
               <span className="op vop-hidden">＋</span>
               <div className="digit-cells">
                 {splitDigits(problem.num1, digits.length).map((d, i) => (
-                  // biome-ignore lint: fixed-length static list, index as key is safe
-                  <div key={i} className="num-cell">{d}</div>
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">
+                    {d}
+                  </div>
                 ))}
               </div>
             </div>
@@ -272,8 +274,10 @@ function App() {
               <span className="op">{problem.operator === '+' ? '＋' : problem.operator === '-' ? '－' : '×'}</span>
               <div className="digit-cells">
                 {splitDigits(problem.num2, digits.length).map((d, i) => (
-                  // biome-ignore lint: fixed-length static list, index as key is safe
-                  <div key={i} className="num-cell">{d}</div>
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                  <div key={i} className="num-cell">
+                    {d}
+                  </div>
                 ))}
               </div>
             </div>
@@ -292,14 +296,20 @@ function App() {
                     ]
                       .filter(Boolean)
                       .join(' ')
-                    // biome-ignore lint: fixed-length static list, index as key is safe
-                    return <div key={i} className={boxClass}>{d}</div>
+                    return (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                      <div key={i} className={boxClass}>
+                        {d}
+                      </div>
+                    )
                   })}
                 </div>
                 <div className="digit-labels">
                   {(digits.length === 3 ? ['ひゃく', 'じゅう', 'いち'] : ['じゅう', 'いち']).map((label, i) => (
-                    // biome-ignore lint: fixed-length static list, index as key is safe
-                    <div key={i} className="digit-label">{label}</div>
+                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length static list, index as key is safe
+                    <div key={i} className="digit-label">
+                      {label}
+                    </div>
                   ))}
                 </div>
               </div>
