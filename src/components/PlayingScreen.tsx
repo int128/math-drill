@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KukuPair, Level, Phase, Problem } from '../types'
 import { generateProblem, getNumBoxes, TOTAL_QUESTIONS } from '../utils'
 import { HissanProblem } from './HissanProblem'
 import { Numpad } from './Numpad'
 import { SimpleProblem } from './SimpleProblem'
+
+type WindowWithWebkitAudio = Window & {
+  webkitAudioContext?: typeof AudioContext
+}
 
 type PlayingScreenProps =
   | { mode: 'hissan'; level: Level; onClear: () => void; onBack: () => void }
@@ -31,6 +35,47 @@ export function PlayingScreen(props: PlayingScreenProps) {
   const [phase, setPhase] = useState<Phase>('question')
   const [correctCount, setCorrectCount] = useState(0)
   const [streak, setStreak] = useState(0)
+  const audioContextRef = useRef<AudioContext | null>(null)
+
+  const playCorrectSound = useCallback(() => {
+    const Ctx = window.AudioContext ?? (window as WindowWithWebkitAudio).webkitAudioContext
+    if (!Ctx) return
+
+    const ctx = audioContextRef.current ?? new Ctx()
+    audioContextRef.current = ctx
+    if (ctx.state === 'suspended') {
+      void ctx.resume()
+    }
+
+    const now = ctx.currentTime
+    const createTone = (startAt: number, freq: number, duration: number, volume: number) => {
+      const gain = ctx.createGain()
+      gain.connect(ctx.destination)
+      gain.gain.setValueAtTime(0.0001, startAt)
+      gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.015)
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration)
+
+      const osc = ctx.createOscillator()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, startAt)
+      osc.connect(gain)
+      osc.start(startAt)
+      osc.stop(startAt + duration)
+    }
+
+    // "ピン" -> "ポーン" の2音チャイム
+    createTone(now, 1000, 0.4, 0.54)
+    createTone(now + 0.14, 800, 0.5, 0.52)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      const ctx = audioContextRef.current
+      if (ctx) {
+        void ctx.close()
+      }
+    }
+  }, [])
 
   // Auto-transition after feedback
   useEffect(() => {
@@ -106,6 +151,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
       if (kukuInput.length === 0) return
       const num = parseInt(kukuInput, 10)
       if (num === problem.answer) {
+        playCorrectSound()
         setCorrectCount((c) => c + 1)
         setStreak((s) => s + 1)
         setPhase('correct')
@@ -118,6 +164,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
     if (filledCount === 0) return
     const num = parseInt(digits.filter((d) => d !== '').join(''), 10)
     if (num === problem.answer) {
+      playCorrectSound()
       setCorrectCount((c) => c + 1)
       setStreak((s) => s + 1)
       setPhase('correct')
@@ -127,7 +174,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setFilledCount(0)
       setPhase('hint')
     }
-  }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer])
+  }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer, playCorrectSound])
 
   // Keyboard support for PC users
   useEffect(() => {
