@@ -2,6 +2,7 @@ import type { Phase } from '../types'
 import { DIGITS } from '../utils'
 
 interface NumpadProps {
+  className?: string
   phase: Phase
   canDelete: boolean
   canSubmit: boolean
@@ -10,9 +11,9 @@ interface NumpadProps {
   onSubmit: () => void
 }
 
-export function Numpad({ phase, canDelete, canSubmit, onDigit, onDelete, onSubmit }: NumpadProps) {
+export function Numpad({ className, phase, canDelete, canSubmit, onDigit, onDelete, onSubmit }: NumpadProps) {
   return (
-    <div className="numpad">
+    <div className={className ? `numpad ${className}` : 'numpad'}>
       {DIGITS.map((d) => (
         <button
           key={d}

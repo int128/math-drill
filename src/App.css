@@ -69,6 +69,58 @@
   padding: 16px;
 }
 
+@media (min-width: 768px) {
+  .playing-main {
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "card numpad"
+      "hint numpad"
+      "back numpad";
+    align-items: center;
+    justify-items: stretch;
+    column-gap: 28px;
+    row-gap: 18px;
+    padding: 20px 24px 28px;
+  }
+
+  .playing-problem-card {
+    grid-area: card;
+    width: 100%;
+  }
+
+  .playing-numpad {
+    grid-area: numpad;
+    width: 100%;
+    max-width: 420px;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .playing-hint-btn {
+    grid-area: hint;
+    justify-self: start;
+  }
+
+  .playing-back-btn {
+    grid-area: back;
+    justify-self: start;
+  }
+
+  .playing-kuku-table-wrap {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .playing-main {
+    grid-template-columns: minmax(0, 1fr) 460px;
+  }
+}
+
 /* ---- Problem Card ---- */
 .problem-card {
   width: min(90vw, 580px);
@@ -813,10 +865,6 @@
   gap: 8px;
   width: min(90vw, 400px);
   align-items: center;
-}
-
-.kuku-dan-list-header {
-  /* empty first cell for alignment */
 }
 
 .kuku-dan-list-col-label {

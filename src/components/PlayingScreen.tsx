@@ -214,7 +214,9 @@ export function PlayingScreen(props: PlayingScreenProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleDigit, handleDelete, handleSubmit])
 
-  const cardClass = ['problem-card', phase !== 'question' ? phase : ''].filter(Boolean).join(' ')
+  const cardClass = ['problem-card', 'playing-problem-card', phase !== 'question' ? phase : '']
+    .filter(Boolean)
+    .join(' ')
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
     .filter(Boolean)
     .join(' ')
@@ -244,7 +246,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
         </div>
       </header>
 
-      <main className="main">
+      <main className="main playing-main">
         <div className={cardClass}>
           <div className={feedbackClass}>
             {phase === 'correct'
@@ -271,6 +273,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
         </div>
 
         <Numpad
+          className="playing-numpad"
           phase={phase}
           canDelete={canDelete}
           canSubmit={canSubmit}
@@ -282,7 +285,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
         {!isSimpleMode && (
           <button
             type="button"
-            className="hint-btn"
+            className="hint-btn playing-hint-btn"
             onClick={() => {
               if (phase === 'hint') {
                 setPhase('question')
@@ -297,7 +300,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
           </button>
         )}
 
-        <button type="button" className="back-btn" onClick={onBack}>
+        <button type="button" className="back-btn playing-back-btn" onClick={onBack}>
           ← もどる
         </button>
       </main>
