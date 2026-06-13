@@ -214,7 +214,9 @@ export function PlayingScreen(props: PlayingScreenProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleDigit, handleDelete, handleSubmit])
 
-  const cardClass = ['problem-card', 'playing-problem-card', phase !== 'question' ? phase : ''].filter(Boolean).join(' ')
+  const cardClass = ['problem-card', 'playing-problem-card', phase !== 'question' ? phase : '']
+    .filter(Boolean)
+    .join(' ')
   const feedbackClass = ['feedback', phase !== 'question' ? 'visible' : '', phase !== 'question' ? phase : '']
     .filter(Boolean)
     .join(' ')
