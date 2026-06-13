@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { KukuPair, Level, Phase, Problem } from '../types'
+import type { KukuPair, KukuTableHole, Level, Phase, Problem } from '../types'
 import { generateProblem, getNumBoxes, TOTAL_QUESTIONS } from '../utils'
 import { HissanProblem } from './HissanProblem'
+import { KukuTableChallenge } from './KukuTableChallenge'
 import { Numpad } from './Numpad'
 import { SimpleProblem } from './SimpleProblem'
 
@@ -12,17 +13,24 @@ type WindowWithWebkitAudio = Window & {
 type PlayingScreenProps =
   | { mode: 'hissan'; level: Level; onClear: () => void; onBack: () => void }
   | { mode: 'kuku'; dan: number; pairs: KukuPair[]; onClear: () => void; onBack: () => void }
+  | { mode: 'kuku-table'; holes: KukuTableHole[]; onClear: () => void; onBack: () => void }
 
 export function PlayingScreen(props: PlayingScreenProps) {
   const { onClear, onBack } = props
   const isKukuMode = props.mode === 'kuku'
+  const isKukuTableMode = props.mode === 'kuku-table'
   const isSimpleHissan = props.mode === 'hissan' && props.level.difficulty === 'easy'
-  const isSimpleMode = isKukuMode || isSimpleHissan
-  const totalQ = props.mode === 'kuku' ? props.pairs.length : TOTAL_QUESTIONS
+  const isSimpleMode = isKukuMode || isKukuTableMode || isSimpleHissan
+  const totalQ =
+    props.mode === 'kuku' ? props.pairs.length : props.mode === 'kuku-table' ? props.holes.length : TOTAL_QUESTIONS
 
   const [problem, setProblem] = useState<Problem>(() => {
     if (props.mode === 'kuku') {
       const { num1, num2 } = props.pairs[0]
+      return { num1, num2, operator: '*', answer: num1 * num2 }
+    }
+    if (props.mode === 'kuku-table') {
+      const { num1, num2 } = props.holes[0]
       return { num1, num2, operator: '*', answer: num1 * num2 }
     }
     return generateProblem(props.level)
@@ -32,6 +40,7 @@ export function PlayingScreen(props: PlayingScreenProps) {
   )
   const [filledCount, setFilledCount] = useState(0)
   const [kukuInput, setKukuInput] = useState('')
+  const [tableAnswers, setTableAnswers] = useState<Record<string, string>>({})
   const [phase, setPhase] = useState<Phase>('question')
   const [correctCount, setCorrectCount] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -86,6 +95,10 @@ export function PlayingScreen(props: PlayingScreenProps) {
         } else {
           if (props.mode === 'kuku') {
             const { num1, num2 } = props.pairs[correctCount]
+            setProblem({ num1, num2, operator: '*', answer: num1 * num2 })
+            setKukuInput('')
+          } else if (props.mode === 'kuku-table') {
+            const { num1, num2 } = props.holes[correctCount]
             setProblem({ num1, num2, operator: '*', answer: num1 * num2 })
             setKukuInput('')
           } else {
@@ -151,6 +164,9 @@ export function PlayingScreen(props: PlayingScreenProps) {
       if (kukuInput.length === 0) return
       const num = parseInt(kukuInput, 10)
       if (num === problem.answer) {
+        if (props.mode === 'kuku-table') {
+          setTableAnswers((prev) => ({ ...prev, [`${problem.num1}-${problem.num2}`]: kukuInput }))
+        }
         playCorrectSound()
         setCorrectCount((c) => c + 1)
         setStreak((s) => s + 1)
@@ -174,7 +190,18 @@ export function PlayingScreen(props: PlayingScreenProps) {
       setFilledCount(0)
       setPhase('hint')
     }
-  }, [phase, isSimpleMode, kukuInput, filledCount, digits, problem.answer, playCorrectSound])
+  }, [
+    phase,
+    isSimpleMode,
+    kukuInput,
+    filledCount,
+    digits,
+    problem.answer,
+    problem.num1,
+    problem.num2,
+    playCorrectSound,
+    props.mode,
+  ])
 
   // Keyboard support for PC users
   useEffect(() => {
@@ -228,7 +255,15 @@ export function PlayingScreen(props: PlayingScreenProps) {
                   ? 'こうやって といてみよう！🔍'
                   : ''}
           </div>
-          {isSimpleMode ? (
+          {isKukuTableMode ? (
+            <KukuTableChallenge
+              holes={props.holes}
+              filledAnswers={tableAnswers}
+              activeInput={kukuInput}
+              currentIndex={correctCount}
+              phase={phase}
+            />
+          ) : isSimpleMode ? (
             <SimpleProblem problem={problem} kukuInput={kukuInput} phase={phase} />
           ) : (
             <HissanProblem problem={problem} digits={digits} filledCount={filledCount} phase={phase} />

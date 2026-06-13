@@ -9,6 +9,11 @@ export interface KukuPair {
   num2: number
 }
 
+export interface KukuTableHole {
+  num1: number
+  num2: number
+}
+
 export interface Level {
   difficulty: Difficulty
   operator: Operator

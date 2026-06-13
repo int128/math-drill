@@ -1,4 +1,4 @@
-import type { KukuMode, KukuPair, Level, Problem } from './types'
+import type { KukuMode, KukuPair, KukuTableHole, Level, Problem } from './types'
 
 export const LEVELS: Level[] = [
   { difficulty: 'easy', operator: '+', label: 'かんたん たしざん', icon: '⭐' },
@@ -11,6 +11,7 @@ export const LEVELS: Level[] = [
 
 export const TOTAL_QUESTIONS = 10
 export const KUKU_TOTAL = 9
+export const KUKU_TABLE_HOLES = 15
 
 export const DIGITS = ['7', '8', '9', '4', '5', '6', '1', '2', '3'] as const
 
@@ -79,6 +80,16 @@ export function generateKukuPairs(dan: number, mode: KukuMode): KukuPair[] {
   const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]
   const seq = mode === 'order' ? nums : shuffle(nums)
   return seq.map((n2) => ({ num1: dan, num2: n2 }))
+}
+
+export function generateKukuTableHoles(count = KUKU_TABLE_HOLES): KukuTableHole[] {
+  const allCells: KukuTableHole[] = []
+  for (let num1 = 1; num1 <= 9; num1++) {
+    for (let num2 = 1; num2 <= 9; num2++) {
+      allCells.push({ num1, num2 })
+    }
+  }
+  return shuffle(allCells).slice(0, count)
 }
 
 export interface HintLine {
