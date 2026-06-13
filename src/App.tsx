@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import './App.css'
 import { PlayingScreen } from './components/PlayingScreen'
-import type { AppPhase, KukuMode, KukuPair, Level } from './types'
-import { generateKukuPairs, LEVELS, TOTAL_QUESTIONS } from './utils'
+import type { AppPhase, KukuMode, KukuPair, KukuTableHole, Level } from './types'
+import { generateKukuPairs, generateKukuTableHoles, LEVELS, TOTAL_QUESTIONS } from './utils'
 
-type PlayingConfig = { mode: 'hissan'; level: Level } | { mode: 'kuku'; dan: number; pairs: KukuPair[] }
+type PlayingConfig =
+  | { mode: 'hissan'; level: Level }
+  | { mode: 'kuku'; dan: number; pairs: KukuPair[] }
+  | { mode: 'kuku-table'; holes: KukuTableHole[] }
 
 function App() {
   const [appPhase, setAppPhase] = useState<AppPhase>('select')
@@ -17,6 +20,11 @@ function App() {
 
   const startKuku = (dan: number, mode: KukuMode) => {
     setPlayingConfig({ mode: 'kuku', dan, pairs: generateKukuPairs(dan, mode) })
+    setAppPhase('playing')
+  }
+
+  const startKukuTable = () => {
+    setPlayingConfig({ mode: 'kuku-table', holes: generateKukuTableHoles() })
     setAppPhase('playing')
   }
 
@@ -76,6 +84,9 @@ function App() {
         <main className="main">
           <p className="kuku-heading">かけざん 九九</p>
           <p className="kuku-dan-heading">どの だんをえらぼう？</p>
+          <button type="button" className="kuku-table-btn" onClick={startKukuTable}>
+            九九表チャレンジ
+          </button>
           <div className="kuku-dan-list">
             <div className="kuku-dan-list-header" />
             <span className="kuku-dan-list-col-label">じゅんばん</span>
@@ -102,13 +113,19 @@ function App() {
 
   // ---- Clear screen ----
   if (appPhase === 'clear') {
+    const clearedTotal =
+      playingConfig.mode === 'hissan'
+        ? TOTAL_QUESTIONS
+        : playingConfig.mode === 'kuku'
+          ? playingConfig.pairs.length
+          : playingConfig.holes.length
     return (
       <div className="app">
         <main className="main">
           <div className="clear-card">
             <div className="clear-emoji">🎉</div>
             <div className="clear-title">クリア！</div>
-            <div className="clear-score">{TOTAL_QUESTIONS} もん ぜんぶ せいかい！</div>
+            <div className="clear-score">{clearedTotal} もん ぜんぶ せいかい！</div>
             <button type="button" className="retry-btn" onClick={backToSelect}>
               もどる
             </button>
@@ -130,6 +147,18 @@ function App() {
       />
     )
   }
+
+  if (playingConfig.mode === 'kuku-table') {
+    return (
+      <PlayingScreen
+        mode="kuku-table"
+        holes={playingConfig.holes}
+        onClear={() => setAppPhase('clear')}
+        onBack={backToSelect}
+      />
+    )
+  }
+
   return (
     <PlayingScreen
       mode="hissan"
