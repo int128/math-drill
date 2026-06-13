@@ -30,7 +30,7 @@ export function KukuTableChallenge({
   const activeKey = activeHole ? cellKey(activeHole.num1, activeHole.num2) : ''
 
   return (
-    <div className="kuku-table-wrap">
+    <div className="kuku-table-wrap playing-kuku-table-wrap">
       <div className="kuku-table-caption">あいている ますに こたえをいれよう！</div>
       <table className="kuku-table-grid" aria-label="九九表チャレンジ">
         <thead>
