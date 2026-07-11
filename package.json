@@ -15,7 +15,7 @@
     "react-router": "7.18.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.2",
+    "@biomejs/biome": "2.5.3",
     "@tsconfig/vite-react": "8.0.6",
     "@types/node": "24.13.2",
     "@types/react": "19.2.17",
