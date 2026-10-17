@@ -183,8 +183,8 @@ importers:
         specifier: 8.1.1
         version: 8.1.1
       '@types/node':
-        specifier: 24.19.1
-        version: 24.19.1
+        specifier: 24.19.2
+        version: 24.19.2
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -193,7 +193,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
         specifier: 6.1.2
-        version: 6.1.2(vite@8.3.4(@types/node@24.19.1))
+        version: 6.1.2(vite@8.3.4(@types/node@24.19.2))
       pnpm:
         specifier: 12.10.1
         version: 12.10.1
@@ -202,7 +202,7 @@ importers:
         version: 7.0.2
       vite:
         specifier: 8.3.4
-        version: 8.3.4(@types/node@24.19.1)
+        version: 8.3.4(@types/node@24.19.2)
 
 packages:
 
@@ -448,8 +448,8 @@ packages:
   '@tsconfig/vite-react@8.1.1':
     resolution: {integrity: sha512-TdLtRE9INt7aupEC2yhem6y4RN8T+B4oa2OUYsay0ioxSDl8Q4yaq0k2yc86Gb2BEHjKp4RUxgIzqOTk4IQ8dQ==}
 
-  '@types/node@24.19.1':
-    resolution: {integrity: sha512-aS3/DG0oM05K0RIXXP+hKjinGG5IgSSVGzswZxW3O0sS3pH4/fycXundUC9XsszgKCk4gHXylTEK6hyFxVxnoQ==}
+  '@types/node@24.19.2':
+    resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
   '@types/react-dom@19.3.0':
     resolution: {integrity: sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q==}
@@ -932,7 +932,7 @@ snapshots:
 
   '@tsconfig/vite-react@8.1.1': {}
 
-  '@types/node@24.19.1':
+  '@types/node@24.19.2':
     dependencies:
       undici-types: 7.24.6
 
@@ -1004,10 +1004,10 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@vitejs/plugin-react@6.1.2(vite@8.3.4(@types/node@24.19.1))':
+  '@vitejs/plugin-react@6.1.2(vite@8.3.4(@types/node@24.19.2))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 8.3.4(@types/node@24.19.1)
+      vite: 8.3.4(@types/node@24.19.2)
 
   cookie-es@3.1.1: {}
 
@@ -1170,7 +1170,7 @@ snapshots:
 
   undici-types@7.24.6: {}
 
-  vite@8.3.4(@types/node@24.19.1):
+  vite@8.3.4(@types/node@24.19.2):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -1178,5 +1178,5 @@ snapshots:
       rolldown: 1.2.14
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 24.19.1
+      '@types/node': 24.19.2
       fsevents: 2.3.3
